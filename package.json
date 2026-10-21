@@ -1,8 +1,7 @@
 {
-  "name": "study-helper-extension",
+  "name": "lectio-study-helper",
   "version": "1.0.0",
   "description": "",
-  "main": "popup.js",
   "scripts": {
     "build": "vite build",
     "watch": "vite build --watch"
@@ -18,5 +17,6 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^6.1.2",
     "vite": "^8.3.5"
-  }
+  },
+  "private": true
 }
