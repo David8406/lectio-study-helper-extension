@@ -1,0 +1,13 @@
+# Project exclude paths
+/node_modules/
+/node_modules/@vitejs/plugin-react/LICENSE
+/node_modules/@vitejs/plugin-react/README.md
+/node_modules/react/LICENSE
+/node_modules/react/README.md
+/node_modules/react-dom/LICENSE
+/node_modules/react-dom/README.md
+/node_modules/vite/LICENSE.md
+/node_modules/vite/README.md
+/.idea/
+/.codex/
+/dist/
