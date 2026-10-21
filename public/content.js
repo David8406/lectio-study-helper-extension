@@ -1,0 +1,1 @@
+console.log("Lectio content script loaded");
