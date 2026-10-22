@@ -1,6 +1,10 @@
 console.log("Lectio content script loaded");
 
-document.addEventListener("mouseup", () => {
+document.addEventListener("mouseup", async () => {
+
+    const data = await chrome.storage.local.get("highlightEnabled");
+    if (data.highlightEnabled === false) return;
+
     const selection = window.getSelection();
     const selectionText = selection.toString().trim();
     if (selectionText === "") return;
