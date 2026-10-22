@@ -13,6 +13,8 @@ function App() {
 
     const [highlightEnable, setHighlightEnable] = useState(true);
 
+    const [serverMessage, setServerMessage] = useState("");
+
     useEffect(() => {
         chrome.storage.local.get("highlightEnabled").then((data) => {
             if (data.highlightEnabled === false) setHighlightEnable(false);
@@ -40,6 +42,16 @@ function App() {
         }
     }
 
+    async function checkServer(){
+        try {
+            const response = await fetch("http://localhost:3000/");
+            const data = await response.json();
+            setServerMessage(data.message);
+        } catch (err) {
+            setServerMessage("Server is offline");
+        }
+    }
+
     return (
         <div>
             <h1>Word counter</h1>
@@ -47,6 +59,8 @@ function App() {
             {count !== null && <p>{count} words</p>}
             {error && <p>{error}</p>}
             <button onClick={toggleHighlight}>Toggle highlight {highlightEnable ? "ON" : "OFF" }</button>
+            <button onClick={checkServer}>Check server</button>
+            {serverMessage && <p>{serverMessage}</p>}
         </div>
     );
 }

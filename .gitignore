@@ -1,5 +1,5 @@
 # Project exclude paths
-/node_modules/
+node_modules/
 /node_modules/@vitejs/plugin-react/LICENSE
 /node_modules/@vitejs/plugin-react/README.md
 /node_modules/react/LICENSE
