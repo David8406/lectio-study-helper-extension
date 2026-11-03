@@ -57,7 +57,6 @@ app.post("/login", async (req, res) => {
     }
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: "7d" });
     res.json({token: token});
-    return res.status(200).json({ message: "User logged in" });
 })
 
 app.listen(PORT, () => {
