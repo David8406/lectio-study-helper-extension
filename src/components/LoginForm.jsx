@@ -56,7 +56,7 @@ function LoginForm() {
             <RegisterForm
                 onRegistered={() => {
                     setShowRegister(false);
-                    setLoginMessage("Account created! Please log in.");
+                    setLoginMessage("Account created! Check your email (also the Spam folder) to verify it.");
                 }}
                 onCancel={() => setShowRegister(false)}
             />
