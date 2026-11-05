@@ -9,6 +9,7 @@ import crypto from "crypto";
 
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded());
 const PORT = 3000;
 const SUMMARY_DAILY_LIMIT = Number(process.env.SUMMARY_DAILY_LIMIT) || 10;
 
@@ -37,6 +38,16 @@ async function sendVerifyEmail(email, verifyCode) {
         to: email,
         subject: "Verify your Lectio account",
         text: `Welcome to Lectio! Click this link to verify your account: ${link}`,
+    });
+}
+
+async function sendResetEmail(email, resetCode) {
+    const link = `http://localhost:3000/reset-password?code=${resetCode}`;
+    await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Reset your Lectio password",
+        text: `Click this link to choose a new password (it works for 1 hour): ${link}\n\nIf you didn't ask for this, you can ignore this email.`,
     });
 }
 
@@ -171,6 +182,66 @@ app.post("/resend-verification", async (req, res) => {
         await sendVerifyEmail(email, user.verify_code);
     }
     res.json({ message: "If this account exists and isn't verified, we sent a new email." });
+});
+
+const lastResetTime = {};
+
+app.post("/forgot-password", async (req, res) => {
+    const { email } = req.body;
+
+    const now = Date.now();
+    if (lastResetTime[email] && now - lastResetTime[email] < 60 * 1000) {
+        return res.status(429).json({ error: "Please wait a minute before asking for another email." });
+    }
+    lastResetTime[email] = now;
+
+    const resetCode = crypto.randomUUID();
+    const result = await db.query(
+        "UPDATE users SET reset_code = $1, reset_expires = NOW() + INTERVAL '1 hour' WHERE email = $2 RETURNING id",
+        [resetCode, email]
+    );
+    if (result.rows.length > 0) {
+        await sendResetEmail(email, resetCode);
+    }
+    res.json({ message: "If an account with this email exists, we sent a link to reset the password." });
+});
+
+app.get("/reset-password", async (req, res) => {
+    const code = req.query.code;
+    const result = await db.query(
+        "SELECT id FROM users WHERE reset_code = $1 AND reset_expires > NOW()",
+        [code]
+    );
+    if (result.rows.length === 0) {
+        return res.status(400).send("This link is invalid or has expired.");
+    }
+
+    res.send(`
+        <h1>Choose a new password</h1>
+        <form method="POST" action="/reset-password">
+            <input type="hidden" name="code" value="${code}">
+            <input type="password" name="password" placeholder="New password" required>
+            <input type="password" name="passwordConfirm" placeholder="Confirm new password" required>
+            <button type="submit">Save new password</button>
+        </form>
+    `);
+});
+
+app.post("/reset-password", async (req, res) => {
+    const { code, password, passwordConfirm } = req.body;
+    if (password !== passwordConfirm) {
+        return res.status(400).send("Passwords do not match. Go back and try again.");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const result = await db.query(
+        "UPDATE users SET password_hash = $1, reset_code = NULL, reset_expires = NULL, email_verified = true WHERE reset_code = $2 AND reset_expires > NOW() RETURNING id",
+        [hashedPassword, code]
+    );
+    if (result.rows.length === 0) {
+        return res.status(400).send("This link is invalid or has expired.");
+    }
+    res.send("Password changed! You can now log in from the Lectio extension.");
 });
 
 app.listen(PORT, () => {
