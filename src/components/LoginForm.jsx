@@ -1,21 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import RegisterForm from "./RegisterForm.jsx";
-import Summarize from "./Summarize.jsx";
 
-function LoginForm() {
+function LoginForm({ onLoggedIn }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loginMessage, setLoginMessage] = useState("");
 
-    const [loggedInEmail, setLoggedInEmail] = useState(null);
     const [showRegister, setShowRegister] = useState(false);
     const [needsVerify, setNeedsVerify] = useState(false);
-
-    useEffect(() => {
-        chrome.storage.local.get(["token", "email"]).then((data) => {
-            if (data.token) setLoggedInEmail(data.email);
-        });
-    }, []);
 
     async function handleLogin(){
         try {
@@ -29,8 +21,8 @@ function LoginForm() {
                 setLoginMessage("");
                 setNeedsVerify(false);
                 await chrome.storage.local.set({token: data.token, email});
-                setLoggedInEmail(email);
                 setPassword("");
+                onLoggedIn(email);
             }
             else {
                 setLoginMessage(data.error);
@@ -71,21 +63,6 @@ function LoginForm() {
         } catch (error) {
             setLoginMessage("Server is offline");
         }
-    }
-
-    async function handleLogout(){
-        await chrome.storage.local.remove(["token", "email"]);
-        setLoggedInEmail(null);
-    }
-
-    if (loggedInEmail) {
-        return (
-            <div>
-                <p>Logged in as {loggedInEmail}</p>
-                <Summarize onUnauthorized={handleLogout} />
-                <button onClick={handleLogout}>Log out</button>
-            </div>
-        );
     }
 
     if (showRegister) {
