@@ -154,6 +154,25 @@ app.get("/verify", async (req, res) => {
     res.send("Email verified! You can now log in from the Lectio extension");
 })
 
+const lastResendTime = {};
+
+app.post("/resend-verification", async (req, res) => {
+    const { email } = req.body;
+
+    const now = Date.now();
+    if (lastResendTime[email] && now - lastResendTime[email] < 60 * 1000) {
+        return res.status(429).json({ error: "Please wait a minute before asking for another email." });
+    }
+    lastResendTime[email] = now;
+
+    const result = await db.query("SELECT * FROM users WHERE email = $1", [email]);
+    const user = result.rows[0];
+    if (user && !user.email_verified) {
+        await sendVerifyEmail(email, user.verify_code);
+    }
+    res.json({ message: "If this account exists and isn't verified, we sent a new email." });
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
