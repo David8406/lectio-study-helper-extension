@@ -58,13 +58,22 @@ function Summarize({ onUnauthorized }) {
         setLoading(false);
     }
 
+    const points = summary
+        .split("\n")
+        .map((line) => line.replaceAll("**", "").replace(/^[-*•]\s*/, "").trim())
+        .filter((line) => line !== "");
+
     return (
         <div>
             <button onClick={handleSummarize} disabled={loading}>
                 {loading ? "Summarizing..." : "Summarize page"}
             </button>
             {message && <p>{message}</p>}
-            {summary && <p style={{ whiteSpace: "pre-wrap" }}>{summary}</p>}
+            {points.length > 0 && (
+                <ul className="summary">
+                    {points.map((point, index) => <li key={index}>{point}</li>)}
+                </ul>
+            )}
         </div>
     );
 }

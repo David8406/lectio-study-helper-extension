@@ -1,23 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import RegisterForm from "./RegisterForm.jsx";
-import Summarize from "./Summarize.jsx";
 
-function LoginForm() {
+function LoginForm({ onLoggedIn }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loginMessage, setLoginMessage] = useState("");
 
-    const [loggedInEmail, setLoggedInEmail] = useState(null);
     const [showRegister, setShowRegister] = useState(false);
     const [needsVerify, setNeedsVerify] = useState(false);
-
-    useEffect(() => {
-        chrome.storage.local.get(["token", "email"]).then((data) => {
-            if (data.token) setLoggedInEmail(data.email);
-        });
-    }, []);
+    const [loading, setLoading] = useState(false);
 
     async function handleLogin(){
+        setLoading(true);
         try {
             const response = await fetch("http://localhost:3000/login", {
                 method: "POST",
@@ -29,8 +23,8 @@ function LoginForm() {
                 setLoginMessage("");
                 setNeedsVerify(false);
                 await chrome.storage.local.set({token: data.token, email});
-                setLoggedInEmail(email);
                 setPassword("");
+                onLoggedIn(email);
             }
             else {
                 setLoginMessage(data.error);
@@ -39,6 +33,7 @@ function LoginForm() {
         } catch (error) {
             setLoginMessage("Server is offline");
         }
+        setLoading(false);
     }
 
     async function handleResend() {
@@ -73,21 +68,6 @@ function LoginForm() {
         }
     }
 
-    async function handleLogout(){
-        await chrome.storage.local.remove(["token", "email"]);
-        setLoggedInEmail(null);
-    }
-
-    if (loggedInEmail) {
-        return (
-            <div>
-                <p>Logged in as {loggedInEmail}</p>
-                <Summarize onUnauthorized={handleLogout} />
-                <button onClick={handleLogout}>Log out</button>
-            </div>
-        );
-    }
-
     if (showRegister) {
         return (
             <RegisterForm
@@ -104,9 +84,11 @@ function LoginForm() {
         <div>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
-            <button onClick={handleLogin}>Login</button>
-            <button onClick={() => setShowRegister(true)}>Create account</button>
-            <button onClick={handleForgotPassword}>Forgot password?</button>
+            <button onClick={handleLogin} disabled={loading}>
+                {loading ? "Logging in..." : "Login"}
+            </button>
+            <button className="secondary" onClick={() => setShowRegister(true)}>Create account</button>
+            <button className="secondary" onClick={handleForgotPassword}>Forgot password?</button>
             {loginMessage && <p>{loginMessage}</p>}
             {needsVerify && <button onClick={handleResend}>Resend email</button>}
         </div>

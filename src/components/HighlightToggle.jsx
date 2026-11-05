@@ -16,8 +16,11 @@ function HighlightToggle() {
     }
 
     return (
-        <div>
-            <button onClick={toggleHighlight}>Toggle highlight {highlightEnable ? "ON" : "OFF" }</button>
+        <div className="row">
+            <span>Highlighter</span>
+            <button className={highlightEnable ? "" : "off"} onClick={toggleHighlight}>
+                {highlightEnable ? "ON" : "OFF"}
+            </button>
         </div>
     );
 }
