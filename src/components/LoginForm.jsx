@@ -55,6 +55,24 @@ function LoginForm() {
         }
     }
 
+    async function handleForgotPassword() {
+        if (!email) {
+            setLoginMessage("Type your email first, then click Forgot password.");
+            return;
+        }
+        try {
+            const response = await fetch("http://localhost:3000/forgot-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+            });
+            const data = await response.json();
+            setLoginMessage(data.message || data.error);
+        } catch (error) {
+            setLoginMessage("Server is offline");
+        }
+    }
+
     async function handleLogout(){
         await chrome.storage.local.remove(["token", "email"]);
         setLoggedInEmail(null);
@@ -88,6 +106,7 @@ function LoginForm() {
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
             <button onClick={handleLogin}>Login</button>
             <button onClick={() => setShowRegister(true)}>Create account</button>
+            <button onClick={handleForgotPassword}>Forgot password?</button>
             {loginMessage && <p>{loginMessage}</p>}
             {needsVerify && <button onClick={handleResend}>Resend email</button>}
         </div>
