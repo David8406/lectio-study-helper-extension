@@ -4,11 +4,22 @@ function readPageText() {
     return (document.querySelector("main") || document.body).innerText;
 }
 
+export function isViewer(url) {
+    return url.startsWith(chrome.runtime.getURL("viewer.html"));
+}
+
+export function getPdfUrl(url) {
+    if (isViewer(url)) return new URL(url).searchParams.get("file");
+    if (url.toLowerCase().endsWith(".pdf")) return url;
+    return null;
+}
+
 export async function getPageText() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     try {
-        if (tab.url.toLowerCase().endsWith(".pdf")) {
-            const text = await getPdfText(tab.url);
+        const pdfUrl = getPdfUrl(tab.url);
+        if (pdfUrl) {
+            const text = await getPdfText(pdfUrl);
             if (text.trim() === "") return { tab, problem: "This PDF has no text (it's probably scanned)" };
             return { tab, text };
         }

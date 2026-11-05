@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Header from "./components/Header.jsx";
 import WordCounter from "./components/WordCounter.jsx";
 import HighlightToggle from "./components/HighlightToggle.jsx";
+import OpenInLectio from "./components/OpenInLectio.jsx";
 import Summarize from "./components/Summarize.jsx";
 import LoginForm from "./components/LoginForm.jsx";
 
@@ -43,6 +44,7 @@ function App() {
                         <h2>Page tools</h2>
                         <WordCounter />
                         <HighlightToggle />
+                        <OpenInLectio />
                     </section>
                     <section className="card">
                         <h2>AI summary</h2>

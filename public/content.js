@@ -1,6 +1,9 @@
 console.log("Lectio content script loaded");
 
 function getPageUrl() {
+    if (location.protocol === "chrome-extension:") {
+        return new URLSearchParams(location.search).get("file");
+    }
     return location.href.split("#")[0];
 }
 
