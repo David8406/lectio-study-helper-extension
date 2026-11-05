@@ -1,9 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-// Long pages are cut to this many characters (the server has the same limit)
 const MAX_CHARS = 20000;
 
-// Runs inside the web page: use <main> if the page has one (skips menus and footers)
 function getPageText() {
     return (document.querySelector("main") || document.body).innerText;
 }
@@ -12,6 +10,15 @@ function Summarize({ onUnauthorized }) {
     const [summary, setSummary] = useState("");
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        async function loadSavedSummary() {
+            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            const { lastSummary } = await chrome.storage.local.get("lastSummary");
+            if (lastSummary && lastSummary.url === tab.url) setSummary(lastSummary.text);
+        }
+        loadSavedSummary();
+    }, []);
 
     async function handleSummarize() {
         setSummary("");
@@ -40,6 +47,7 @@ function Summarize({ onUnauthorized }) {
 
             if (response.ok) {
                 setSummary(data.summary);
+                await chrome.storage.local.set({ lastSummary: { url: tab.url, text: data.summary } });
                 if (text.length > MAX_CHARS) setMessage("This page is long, so the summary covers its first part.");
             }
             else if (response.status === 401) onUnauthorized();
