@@ -8,8 +8,10 @@ function LoginForm({ onLoggedIn }) {
 
     const [showRegister, setShowRegister] = useState(false);
     const [needsVerify, setNeedsVerify] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     async function handleLogin(){
+        setLoading(true);
         try {
             const response = await fetch("http://localhost:3000/login", {
                 method: "POST",
@@ -31,6 +33,7 @@ function LoginForm({ onLoggedIn }) {
         } catch (error) {
             setLoginMessage("Server is offline");
         }
+        setLoading(false);
     }
 
     async function handleResend() {
@@ -81,7 +84,9 @@ function LoginForm({ onLoggedIn }) {
         <div>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
-            <button onClick={handleLogin}>Login</button>
+            <button onClick={handleLogin} disabled={loading}>
+                {loading ? "Logging in..." : "Login"}
+            </button>
             <button className="secondary" onClick={() => setShowRegister(true)}>Create account</button>
             <button className="secondary" onClick={handleForgotPassword}>Forgot password?</button>
             {loginMessage && <p>{loginMessage}</p>}

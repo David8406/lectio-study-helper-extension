@@ -5,6 +5,7 @@ function RegisterForm({ onRegistered, onCancel }) {
     const [password, setPassword] = useState("");
     const [passwordConfirm, setPasswordConfirm] = useState("");
     const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
 
     async function handleRegister(){
         if (password !== passwordConfirm) {
@@ -12,6 +13,7 @@ function RegisterForm({ onRegistered, onCancel }) {
             return;
         }
 
+        setLoading(true);
         try {
             const response = await fetch("http://localhost:3000/register", {
                 method: "POST",
@@ -24,6 +26,7 @@ function RegisterForm({ onRegistered, onCancel }) {
         } catch (error) {
             setMessage("Server is offline");
         }
+        setLoading(false);
     }
 
     return (
@@ -31,7 +34,9 @@ function RegisterForm({ onRegistered, onCancel }) {
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
             <input type="password" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} placeholder="Confirm password" />
-            <button onClick={handleRegister}>Create account</button>
+            <button onClick={handleRegister} disabled={loading}>
+                {loading ? "Creating account..." : "Create account"}
+            </button>
             <button className="secondary" onClick={onCancel}>Back to login</button>
             {message && <p>{message}</p>}
         </div>
