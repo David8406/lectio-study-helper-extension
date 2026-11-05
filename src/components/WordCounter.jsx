@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { getPageText } from "../pageText.js";
 
-function countWords() {
-    const pageText = document.body.innerText.trim();
-    if (pageText === "") return 0;
-    const words = pageText.split(/\s+/);
-    return words.length;
+const WORDS_PER_MINUTE = 120;
+
+function countWords(text) {
+    const trimmed = text.trim();
+    if (trimmed === "") return 0;
+    return trimmed.split(/\s+/).length;
 }
 
 function WordCounter() {
@@ -13,23 +15,16 @@ function WordCounter() {
 
     useEffect(() => {
         async function loadCount() {
-            try {
-                const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-                const results = await chrome.scripting.executeScript({
-                    target: { tabId: tab.id },
-                    func: countWords,
-                });
-                setCount(results[0].result);
-            } catch (err) {
-                setError("Not available on this page");
-            }
+            const { text, problem } = await getPageText();
+            if (problem) setError(problem);
+            else setCount(countWords(text));
         }
         loadCount();
     }, []);
 
     let text = "Counting...";
     if (error) text = error;
-    else if (count !== null) text = `${count.toLocaleString()} words · ${Math.ceil(count / 200)} min read`;
+    else if (count !== null) text = `${count.toLocaleString()} words · ${Math.ceil(count / WORDS_PER_MINUTE)} min read`;
 
     return (
         <div className="row">

@@ -1,10 +1,7 @@
 import { useState, useEffect } from "react";
+import { getPageText } from "../pageText.js";
 
 const MAX_CHARS = 20000;
-
-function getPageText() {
-    return (document.querySelector("main") || document.body).innerText;
-}
 
 function Summarize({ onUnauthorized }) {
     const [summary, setSummary] = useState("");
@@ -25,12 +22,12 @@ function Summarize({ onUnauthorized }) {
         setMessage("");
         setLoading(true);
         try {
-            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-            const results = await chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                func: getPageText,
-            });
-            const text = results[0].result;
+            const { tab, text, problem } = await getPageText();
+            if (problem) {
+                setMessage(problem);
+                setLoading(false);
+                return;
+            }
             const textToSend = text.slice(0, MAX_CHARS);
 
             const { token } = await chrome.storage.local.get("token");
@@ -53,6 +50,7 @@ function Summarize({ onUnauthorized }) {
             else if (response.status === 401) onUnauthorized();
             else setMessage(data.error);
         } catch (error) {
+            console.error(error);
             setMessage("Can't summarize this page, or the server is offline.");
         }
         setLoading(false);
