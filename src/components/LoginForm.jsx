@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import RegisterForm from "./RegisterForm.jsx";
+import Summarize from "./Summarize.jsx";
 
 function LoginForm() {
     const [email, setEmail] = useState("");
@@ -44,6 +45,7 @@ function LoginForm() {
         return (
             <div>
                 <p>Logged in as {loggedInEmail}</p>
+                <Summarize onUnauthorized={handleLogout} />
                 <button onClick={handleLogout}>Log out</button>
             </div>
         );
