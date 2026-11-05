@@ -9,6 +9,7 @@ function LoginForm() {
 
     const [loggedInEmail, setLoggedInEmail] = useState(null);
     const [showRegister, setShowRegister] = useState(false);
+    const [needsVerify, setNeedsVerify] = useState(false);
 
     useEffect(() => {
         chrome.storage.local.get(["token", "email"]).then((data) => {
@@ -26,11 +27,29 @@ function LoginForm() {
             const data = await response.json();
             if (response.ok){
                 setLoginMessage("");
+                setNeedsVerify(false);
                 await chrome.storage.local.set({token: data.token, email});
                 setLoggedInEmail(email);
                 setPassword("");
             }
-            else setLoginMessage(data.error);
+            else {
+                setLoginMessage(data.error);
+                setNeedsVerify(response.status === 403);
+            }
+        } catch (error) {
+            setLoginMessage("Server is offline");
+        }
+    }
+
+    async function handleResend() {
+        try {
+            const response = await fetch("http://localhost:3000/resend-verification", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+            });
+            const data = await response.json();
+            setLoginMessage(data.message || data.error);
         } catch (error) {
             setLoginMessage("Server is offline");
         }
@@ -56,7 +75,7 @@ function LoginForm() {
             <RegisterForm
                 onRegistered={() => {
                     setShowRegister(false);
-                    setLoginMessage("Account created! Please log in.");
+                    setLoginMessage("Account created! Check your email (also the Spam folder) to verify it.");
                 }}
                 onCancel={() => setShowRegister(false)}
             />
@@ -70,6 +89,7 @@ function LoginForm() {
             <button onClick={handleLogin}>Login</button>
             <button onClick={() => setShowRegister(true)}>Create account</button>
             {loginMessage && <p>{loginMessage}</p>}
+            {needsVerify && <button onClick={handleResend}>Resend email</button>}
         </div>
     );
 }
