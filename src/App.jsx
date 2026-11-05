@@ -34,14 +34,26 @@ function App() {
             />
             {screen === "login" ? (
                 <div>
-                    <button onClick={() => setScreen("main")}>← Back</button>
+                    <button className="secondary" onClick={() => setScreen("main")}>← Back</button>
                     <LoginForm onLoggedIn={handleLoggedIn} />
                 </div>
             ) : (
                 <div>
-                    <WordCounter />
-                    <HighlightToggle />
-                    {loggedInEmail && <Summarize onUnauthorized={handleLogout} />}
+                    <section className="card">
+                        <h2>Page tools</h2>
+                        <WordCounter />
+                        <HighlightToggle />
+                    </section>
+                    <section className="card">
+                        <h2>AI summary</h2>
+                        {loggedInEmail ? (
+                            <Summarize onUnauthorized={handleLogout} />
+                        ) : (
+                            <button className="locked" onClick={() => setScreen("login")}>
+                                Log in to summarize
+                            </button>
+                        )}
+                    </section>
                 </div>
             )}
         </div>

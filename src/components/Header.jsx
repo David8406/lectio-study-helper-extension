@@ -5,7 +5,7 @@ function Header({ loggedInEmail, onLoginClick, onLogout }) {
             {loggedInEmail ? (
                 <div>
                     <span className="header-email">{loggedInEmail}</span>
-                    <button onClick={onLogout}>Log out</button>
+                    <button className="secondary" onClick={onLogout}>Log out</button>
                 </div>
             ) : (
                 <button onClick={onLoginClick}>Log in</button>

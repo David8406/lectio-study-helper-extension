@@ -32,7 +32,7 @@ function RegisterForm({ onRegistered, onCancel }) {
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
             <input type="password" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} placeholder="Confirm password" />
             <button onClick={handleRegister}>Create account</button>
-            <button onClick={onCancel}>Back to login</button>
+            <button className="secondary" onClick={onCancel}>Back to login</button>
             {message && <p>{message}</p>}
         </div>
     );

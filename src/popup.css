@@ -31,3 +31,79 @@ h1 {
     color: #6b7280;
     margin-right: 8px;
 }
+
+.card {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+h2 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+    margin: 0 0 8px;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+}
+
+.row + .row {
+    border-top: 1px solid #f3f4f6;
+}
+
+.value {
+    color: #6b7280;
+}
+
+button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font: inherit;
+    cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+    filter: brightness(0.9);
+}
+
+button:disabled {
+    background: #d1d5db;
+    cursor: not-allowed;
+}
+
+button.secondary {
+    background: none;
+    color: var(--accent);
+    padding: 6px 4px;
+}
+
+input {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+    margin-bottom: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font: inherit;
+}
+
+input:focus {
+    outline: 2px solid var(--accent);
+    border-color: transparent;
+}
+
+button.locked, button.off {
+    background: #e5e7eb;
+    color: #6b7280;
+}

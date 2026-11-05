@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function countWords() {
     const pageText = document.body.innerText.trim();
@@ -11,26 +11,30 @@ function WordCounter() {
     const [count, setCount] = useState(null);
     const [error, setError] = useState("");
 
-    async function handleClick() {
-        setError("");
-        try {
-            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-            const results = await chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                func: countWords,
-            });
-            setCount(results[0].result);
-        } catch (err) {
-            setCount(null);
-            setError("Can't count words on this page.");
+    useEffect(() => {
+        async function loadCount() {
+            try {
+                const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                const results = await chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    func: countWords,
+                });
+                setCount(results[0].result);
+            } catch (err) {
+                setError("Not available on this page");
+            }
         }
-    }
+        loadCount();
+    }, []);
+
+    let text = "Counting...";
+    if (error) text = error;
+    else if (count !== null) text = `${count.toLocaleString()} words · ${Math.ceil(count / 200)} min read`;
 
     return (
-        <div>
-            <button onClick={handleClick}>Count words</button>
-            {count !== null && <p>{count} words</p>}
-            {error && <p>{error}</p>}
+        <div className="row">
+            <span>This page</span>
+            <span className="value">{text}</span>
         </div>
     );
 }

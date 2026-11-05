@@ -82,8 +82,8 @@ function LoginForm({ onLoggedIn }) {
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
             <button onClick={handleLogin}>Login</button>
-            <button onClick={() => setShowRegister(true)}>Create account</button>
-            <button onClick={handleForgotPassword}>Forgot password?</button>
+            <button className="secondary" onClick={() => setShowRegister(true)}>Create account</button>
+            <button className="secondary" onClick={handleForgotPassword}>Forgot password?</button>
             {loginMessage && <p>{loginMessage}</p>}
             {needsVerify && <button onClick={handleResend}>Resend email</button>}
         </div>
