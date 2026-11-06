@@ -12,13 +12,9 @@ app.use(express.json());
 app.use(express.urlencoded());
 const SUMMARY_DAILY_LIMIT = Number(process.env.SUMMARY_DAILY_LIMIT) || 10;
 const EXPLAIN_DAILY_LIMIT = Number(process.env.EXPLAIN_DAILY_LIMIT) || 30;
+const SERVER_URL = process.env.SERVER_URL || "http://localhost:3000";
 
-const db = new pg.Pool({
-    host: "localhost",
-    port: 5432,
-    database: "lectio",
-    user: "davidmarian",
-});
+const db = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -31,7 +27,7 @@ const transporter = nodemailer.createTransport({
 });
 
 async function sendVerifyEmail(email, verifyCode) {
-    const link = `http://localhost:3000/verify?code=${verifyCode}`;
+    const link = `${SERVER_URL}/verify?code=${verifyCode}`;
     await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: email,
@@ -41,7 +37,7 @@ async function sendVerifyEmail(email, verifyCode) {
 }
 
 async function sendResetEmail(email, resetCode) {
-    const link = `http://localhost:3000/reset-password?code=${resetCode}`;
+    const link = `${SERVER_URL}/reset-password?code=${resetCode}`;
     await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: email,
