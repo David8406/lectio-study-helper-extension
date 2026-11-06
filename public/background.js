@@ -2,12 +2,12 @@ const SERVER_URL = "https://lectio-study-helper-extension.vercel.app";
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "explain") {
-        explain(message.text).then(sendResponse);
+        explain(message.text, message.language).then(sendResponse);
         return true;
     }
 });
 
-async function explain(text) {
+async function explain(text, language) {
     const { token } = await chrome.storage.local.get("token");
     if (!token) return { error: "Log in to Lectio to explain" };
 
@@ -18,7 +18,7 @@ async function explain(text) {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`,
             },
-            body: JSON.stringify({ text }),
+            body: JSON.stringify({ text, language }),
         });
         const data = await response.json();
         if (response.ok) return { explanation: data.explanation };

@@ -172,7 +172,8 @@ function openMenu(mark) {
         try {
             const { list } = await loadHighlights();
             const text = list.find((highlight) => highlight.id === id).text;
-            const response = await chrome.runtime.sendMessage({ type: "explain", text });
+            const language = document.documentElement.lang || navigator.language;
+            const response = await chrome.runtime.sendMessage({ type: "explain", text, language });
             answer.textContent = response.explanation || response.error;
         } catch (error) {
             console.error(error);
