@@ -65,7 +65,7 @@ async function sendResetEmail(email, resetCode) {
     });
 }
 
-function page(title, content) {
+function page(title, content, width = 340) {
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -74,17 +74,21 @@ function page(title, content) {
     <title>${title} · Lectio</title>
     <style>
         body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f3f4f6; font-family: system-ui, sans-serif; font-size: 14px; color: #1f2937; }
-        .card { width: 100%; max-width: 340px; margin: 16px; padding: 24px; background: white; border: 1px solid #e5e7eb; border-radius: 10px; }
+        .card { width: 100%; margin: 16px; padding: 24px; background: white; border: 1px solid #e5e7eb; border-radius: 10px; }
         .logo { color: #4f46e5; font-size: 20px; font-weight: bold; margin: 0 0 16px; }
         h1 { font-size: 16px; margin: 0 0 12px; }
         p { margin: 0; line-height: 1.5; }
+        h2 { font-size: 14px; margin: 20px 0 6px; }
+        p + p { margin-top: 8px; }
+        ul { margin: 8px 0; padding-left: 18px; line-height: 1.5; }
+        a { color: #4f46e5; }
         input { display: block; width: 100%; box-sizing: border-box; padding: 8px; margin-bottom: 8px; border: 1px solid #d1d5db; border-radius: 6px; font: inherit; }
         input:focus { outline: 2px solid #4f46e5; border-color: transparent; }
         button { width: 100%; padding: 8px 12px; background: #4f46e5; color: white; border: none; border-radius: 6px; font: inherit; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="card">
+    <div class="card" style="max-width: ${width}px">
         <p class="logo">Lectio</p>
         <h1>${title}</h1>
         ${content}
@@ -95,6 +99,45 @@ function page(title, content) {
 
 app.get("/", (req, res) => {
     res.json({ message: "Lectio server is running" });
+});
+
+app.get("/privacy", (req, res) => {
+    const contact = `<a href="mailto:${process.env.EMAIL_USER}">${process.env.EMAIL_USER}</a>`;
+    res.send(page("Privacy policy", `
+        <p>Last updated: November 7, 2026</p>
+        <p>Lectio Study Helper is a free Chrome extension made as a student project. This page explains what data it uses and why.</p>
+
+        <h2>What stays on your computer</h2>
+        <p>Your highlights, the highlighter setting and your last summary are saved in Chrome on your computer and are never sent to Lectio's server. Word count and reading time are calculated on your computer. When you log in, a login token is saved in Chrome so you stay logged in for 7 days; it is only sent to the server to prove it's you.</p>
+
+        <h2>Your account</h2>
+        <p>Summarize and Explain need an account. Lectio's server stores:</p>
+        <ul>
+            <li>your email address</li>
+            <li>your password, only as a secure hash (nobody can read the password itself)</li>
+            <li>whether you verified your email, plus temporary codes for verifying your email and resetting your password</li>
+            <li>the time of each summary and explanation, to count the daily limit</li>
+        </ul>
+        <p>The server and the database run in Frankfurt, Germany.</p>
+
+        <h2>Summaries and explanations</h2>
+        <p>When you click Summarize, the page's text (up to 20,000 characters) is sent to Lectio's server. When you click Explain, the highlighted text (up to 2,000 characters) and the page's language are sent. The server sends the text to Cloudflare Workers AI, which writes the answer. Lectio does not save this text, and Cloudflare does not keep it or use it to train AI models. Don't use Summarize or Explain on pages with private information.</p>
+
+        <h2>Emails</h2>
+        <p>Lectio only emails you to verify your account and to reset your password.</p>
+
+        <h2>What Lectio doesn't do</h2>
+        <p>No ads, no tracking, no analytics. Lectio doesn't sell or share your data.</p>
+
+        <h2>Services Lectio uses</h2>
+        <p>Vercel (runs the server; it may keep basic technical logs, like IP addresses, for a short time), Neon (database), Cloudflare (AI), Gmail (sending emails).</p>
+
+        <h2>Delete your data</h2>
+        <p>To delete your account and its data, email ${contact}. Removing the extension from Chrome deletes the data saved on your computer.</p>
+
+        <h2>Contact</h2>
+        <p>${contact}</p>
+    `, 640));
 });
 
 app.get("/users/count", async (req, res) => {
