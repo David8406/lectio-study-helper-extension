@@ -1,3 +1,5 @@
+const SERVER_URL = "https://lectio-study-helper-extension.vercel.app";
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "explain") {
         explain(message.text).then(sendResponse);
@@ -10,7 +12,7 @@ async function explain(text) {
     if (!token) return { error: "Log in to Lectio to explain" };
 
     try {
-        const response = await fetch("http://localhost:3000/explain", {
+        const response = await fetch(`${SERVER_URL}/explain`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

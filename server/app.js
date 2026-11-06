@@ -46,6 +46,34 @@ async function sendResetEmail(email, resetCode) {
     });
 }
 
+function page(title, content) {
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>${title} · Lectio</title>
+    <style>
+        body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f3f4f6; font-family: system-ui, sans-serif; font-size: 14px; color: #1f2937; }
+        .card { width: 100%; max-width: 340px; margin: 16px; padding: 24px; background: white; border: 1px solid #e5e7eb; border-radius: 10px; }
+        .logo { color: #4f46e5; font-size: 20px; font-weight: bold; margin: 0 0 16px; }
+        h1 { font-size: 16px; margin: 0 0 12px; }
+        p { margin: 0; line-height: 1.5; }
+        input { display: block; width: 100%; box-sizing: border-box; padding: 8px; margin-bottom: 8px; border: 1px solid #d1d5db; border-radius: 6px; font: inherit; }
+        input:focus { outline: 2px solid #4f46e5; border-color: transparent; }
+        button { width: 100%; padding: 8px 12px; background: #4f46e5; color: white; border: none; border-radius: 6px; font: inherit; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <p class="logo">Lectio</p>
+        <h1>${title}</h1>
+        ${content}
+    </div>
+</body>
+</html>`;
+}
+
 app.get("/", (req, res) => {
     res.json({ message: "Lectio server is running" });
 });
@@ -186,9 +214,9 @@ app.get("/verify", async (req, res) => {
         [code]
     );
     if (result.rows.length === 0) {
-        return res.status(400).send("This link is invalid or was already used");
+        return res.status(400).send(page("Link not valid", "<p>This link is invalid or was already used.</p>"));
     }
-    res.send("Email verified! You can now log in from the Lectio extension");
+    res.send(page("Email verified", "<p>You can now log in from the Lectio extension.</p>"));
 })
 
 const lastResendTime = {};
@@ -239,24 +267,23 @@ app.get("/reset-password", async (req, res) => {
         [code]
     );
     if (result.rows.length === 0) {
-        return res.status(400).send("This link is invalid or has expired.");
+        return res.status(400).send(page("Link not valid", "<p>This link is invalid or has expired. Ask for a new one with Forgot password in the extension.</p>"));
     }
 
-    res.send(`
-        <h1>Choose a new password</h1>
+    res.send(page("Choose a new password", `
         <form method="POST" action="/reset-password">
             <input type="hidden" name="code" value="${code}">
             <input type="password" name="password" placeholder="New password" required>
             <input type="password" name="passwordConfirm" placeholder="Confirm new password" required>
             <button type="submit">Save new password</button>
         </form>
-    `);
+    `));
 });
 
 app.post("/reset-password", async (req, res) => {
     const { code, password, passwordConfirm } = req.body;
     if (password !== passwordConfirm) {
-        return res.status(400).send("Passwords do not match. Go back and try again.");
+        return res.status(400).send(page("Passwords do not match", "<p>Go back and try again.</p>"));
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -265,9 +292,9 @@ app.post("/reset-password", async (req, res) => {
         [hashedPassword, code]
     );
     if (result.rows.length === 0) {
-        return res.status(400).send("This link is invalid or has expired.");
+        return res.status(400).send(page("Link not valid", "<p>This link is invalid or has expired. Ask for a new one with Forgot password in the extension.</p>"));
     }
-    res.send("Password changed! You can now log in from the Lectio extension.");
+    res.send(page("Password changed", "<p>You can now log in from the Lectio extension.</p>"));
 });
 
 export default app;
