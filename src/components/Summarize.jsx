@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getPageText } from "../pageText.js";
+import { SERVER_URL } from "../config.js";
 
 const MAX_CHARS = 20000;
 
@@ -32,7 +33,7 @@ function Summarize({ onUnauthorized }) {
 
             const { token } = await chrome.storage.local.get("token");
 
-            const response = await fetch("http://localhost:3000/summary", {
+            const response = await fetch(`${SERVER_URL}/summary`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

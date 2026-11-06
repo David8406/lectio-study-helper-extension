@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SERVER_URL } from "../config.js";
 
 function RegisterForm({ onRegistered, onCancel }) {
     const [email, setEmail] = useState("");
@@ -15,7 +16,7 @@ function RegisterForm({ onRegistered, onCancel }) {
 
         setLoading(true);
         try {
-            const response = await fetch("http://localhost:3000/register", {
+            const response = await fetch(`${SERVER_URL}/register`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({ email, password, passwordConfirm }),

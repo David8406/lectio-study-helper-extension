@@ -1,5 +1,6 @@
 import { useState } from "react";
 import RegisterForm from "./RegisterForm.jsx";
+import { SERVER_URL } from "../config.js";
 
 function LoginForm({ onLoggedIn }) {
     const [email, setEmail] = useState("");
@@ -13,7 +14,7 @@ function LoginForm({ onLoggedIn }) {
     async function handleLogin(){
         setLoading(true);
         try {
-            const response = await fetch("http://localhost:3000/login", {
+            const response = await fetch(`${SERVER_URL}/login`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({email: email, password: password}),
@@ -38,7 +39,7 @@ function LoginForm({ onLoggedIn }) {
 
     async function handleResend() {
         try {
-            const response = await fetch("http://localhost:3000/resend-verification", {
+            const response = await fetch(`${SERVER_URL}/resend-verification`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email }),
@@ -56,7 +57,7 @@ function LoginForm({ onLoggedIn }) {
             return;
         }
         try {
-            const response = await fetch("http://localhost:3000/forgot-password", {
+            const response = await fetch(`${SERVER_URL}/forgot-password`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email }),
