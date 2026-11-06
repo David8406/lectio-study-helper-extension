@@ -92,12 +92,16 @@ describe("highlights", () => {
         expect(marks(window)).toEqual(["domesticated descendant of the ", "wolf"]);
     });
 
-    test("clicking a highlight removes all its pieces", async () => {
+    test("clicking a highlight and then Remove removes all its pieces", async () => {
         const window = await openPage();
         await selectAcrossLink(window);
 
         const firstPiece = window.document.querySelector(".lectio-highlight");
         firstPiece.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+        await wait();
+
+        const removeButton = window.document.querySelector(".lectio-remove");
+        removeButton.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
         await wait();
 
         expect(marks(window)).toEqual([]);
