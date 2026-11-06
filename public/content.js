@@ -1,5 +1,7 @@
 console.log("Lectio content script loaded");
 
+let menu = null;
+
 function getPageUrl() {
     if (location.protocol === "chrome-extension:") {
         return new URLSearchParams(location.search).get("file");
@@ -100,6 +102,99 @@ async function removeHighlight(id) {
     await chrome.storage.local.set({ highlights });
 }
 
+function addMenuStyles() {
+    const style = document.createElement("style");
+    style.textContent = `
+        .lectio-menu {
+            position: absolute;
+            z-index: 2147483647;
+            max-width: 320px;
+            padding: 8px;
+            background: white;
+            color: #1f2937;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font: 14px/1.5 system-ui, sans-serif;
+            text-align: left;
+        }
+        .lectio-menu button {
+            margin: 0 6px 0 0;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            background: #4f46e5;
+            color: white;
+            font: inherit;
+            text-transform: none;
+            cursor: pointer;
+        }
+        .lectio-menu button:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+        .lectio-menu .lectio-remove {
+            background: #e5e7eb;
+            color: #6b7280;
+        }
+        .lectio-menu p {
+            margin: 8px 0 0;
+            font: inherit;
+            color: inherit;
+        }
+    `;
+    document.head.append(style);
+}
+
+function closeMenu() {
+    if (menu) menu.remove();
+    menu = null;
+}
+
+function openMenu(mark) {
+    closeMenu();
+    const id = mark.dataset.id;
+
+    const box = document.createElement("div");
+    box.className = "lectio-menu";
+
+    const explainButton = document.createElement("button");
+    explainButton.textContent = "Explain";
+
+    const removeButton = document.createElement("button");
+    removeButton.className = "lectio-remove";
+    removeButton.textContent = "Remove";
+
+    explainButton.addEventListener("click", async () => {
+        explainButton.disabled = true;
+        explainButton.textContent = "Explaining...";
+        const answer = document.createElement("p");
+        try {
+            const { list } = await loadHighlights();
+            const text = list.find((highlight) => highlight.id === id).text;
+            const response = await chrome.runtime.sendMessage({ type: "explain", text });
+            answer.textContent = response.explanation || response.error;
+        } catch (error) {
+            console.error(error);
+            answer.textContent = "Something went wrong, reload the page and try again";
+        }
+        explainButton.remove();
+        box.append(answer);
+    });
+
+    removeButton.addEventListener("click", async () => {
+        closeMenu();
+        await removeHighlight(id);
+    });
+
+    box.append(explainButton, removeButton);
+    const rect = mark.getBoundingClientRect();
+    box.style.top = `${rect.bottom + window.scrollY + 6}px`;
+    box.style.left = `${Math.min(rect.left, window.innerWidth - 340) + window.scrollX}px`;
+    document.body.append(box);
+    menu = box;
+}
+
 document.addEventListener("mouseup", async () => {
 
     const data = await chrome.storage.local.get("highlightEnabled");
@@ -108,6 +203,7 @@ document.addEventListener("mouseup", async () => {
     const selection = window.getSelection();
     const selectionText = selection.toString().trim();
     if (selectionText === "") return;
+    if (selection.anchorNode.parentElement.closest(".lectio-menu")) return;
 
     const existing = selection.anchorNode.parentElement.closest(".lectio-highlight");
     if (existing) {
@@ -135,6 +231,9 @@ document.addEventListener("mouseup", async () => {
 });
 
 document.addEventListener("click", async (event) => {
+    if (event.target.closest(".lectio-menu")) return;
+    closeMenu();
+
     const mark = event.target.closest(".lectio-highlight");
     if (!mark || event.target.closest("a")) return;
     if (window.getSelection().toString().trim() !== "") return;
@@ -142,7 +241,8 @@ document.addEventListener("click", async (event) => {
     const data = await chrome.storage.local.get("highlightEnabled");
     if (data.highlightEnabled === false) return;
 
-    await removeHighlight(mark.dataset.id);
+    openMenu(mark);
 });
 
+addMenuStyles();
 restoreHighlights();
