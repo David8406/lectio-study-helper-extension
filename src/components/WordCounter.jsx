@@ -1,13 +1,6 @@
 import { useState, useEffect } from "react";
 import { getPageText } from "../pageText.js";
-
-const WORDS_PER_MINUTE = 120;
-
-function countWords(text) {
-    const trimmed = text.trim();
-    if (trimmed === "") return 0;
-    return trimmed.split(/\s+/).length;
-}
+import { countWords, readingMinutes } from "../words.js";
 
 function WordCounter() {
     const [count, setCount] = useState(null);
@@ -24,7 +17,7 @@ function WordCounter() {
 
     let text = "Counting...";
     if (error) text = error;
-    else if (count !== null) text = `${count.toLocaleString()} words · ${Math.ceil(count / WORDS_PER_MINUTE)} min read`;
+    else if (count !== null) text = `${count.toLocaleString()} words · ${readingMinutes(count)} min read`;
 
     return (
         <div className="row">
