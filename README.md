@@ -2,7 +2,7 @@
 
 A Chrome extension that helps students study web pages and PDFs: highlight important text, see the word count and reading time, and get AI summaries and explanations.
 
-**Chrome Web Store:** coming soon (in review)
+**Chrome Web Store:** https://chromewebstore.google.com/detail/lectio-study-helper/clidghlohleckfhapdgjlfcbgeenggio
 
 ## Why I built this
 
